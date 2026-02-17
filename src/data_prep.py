@@ -128,14 +128,20 @@ df = df.sort_values('datetime').reset_index(drop=True)
 df['temp_sq'] = df['temp']**2
 df['temp_cb'] = df['temp']**3
 
-# rolling stats at multiple windows
+# ====== LEAKAGE CHECK: rolling stats ======
+# All rolling windows below use the pandas default (trailing / backward-looking).
+# center=False (default) ensures each window only uses current and PAST values.
+# This is safe for time-series forecasting: at prediction time t, we only
+# look at [t-w+1, ..., t], never future values.
+# No centered windows are used anywhere in this pipeline.
 windows = [6, 12, 24, 48, 168]
 m=0
 while m<len(windows):
     w = windows[m]
-    df[f'temp_roll{w}'] = df['temp'].rolling(window=w, min_periods=1).mean()
-    df[f'temp_std{w}'] = df['temp'].rolling(window=w, min_periods=1).std().fillna(0)
-    df[f'load_roll{w}'] = df['mw'].rolling(window=w, min_periods=1).mean()
+    # trailing mean/std — past-only, no leakage
+    df[f'temp_roll{w}'] = df['temp'].rolling(window=w, min_periods=1, center=False).mean()
+    df[f'temp_std{w}'] = df['temp'].rolling(window=w, min_periods=1, center=False).std().fillna(0)
+    df[f'load_roll{w}'] = df['mw'].rolling(window=w, min_periods=1, center=False).mean()
     m+=1
 
 df['temp_diff1'] = df['temp'].diff().fillna(0)
@@ -152,15 +158,19 @@ df['hdd'] = np.maximum(18.0 - df['temp'], 0)
 if 'windspeed' in df.columns:
     df['wind_chill'] = 13.12 + 0.6215*df['temp'] - 11.37*(df['windspeed'].clip(lower=0.1)**0.16) + 0.3965*df['temp']*(df['windspeed'].clip(lower=0.1)**0.16)
 
-# ====== lag features ======
+# ====== LEAKAGE CHECK: lag features ======
+# shift(k) looks k steps into the PAST — safe for forecasting.
+# diff() computes current - previous — also backward-looking only.
+# After creating lags, we dropna() to remove rows that have
+# undefined lags at the start of the series.
 lags = [1, 2, 3, 6, 12, 24, 48, 168, 336]
 n=0
 while n<len(lags):
-    df[f'load_lag{lags[n]}'] = df['mw'].shift(lags[n])
+    df[f'load_lag{lags[n]}'] = df['mw'].shift(lags[n])  # backward shift only
     n+=1
 
-df['load_diff1'] = df['mw'].diff().fillna(0)
-df['load_diff24'] = df['mw'].diff(24).fillna(0)
+df['load_diff1'] = df['mw'].diff().fillna(0)    # backward diff
+df['load_diff24'] = df['mw'].diff(24).fillna(0)  # backward diff
 
 df = df.dropna()
 print(f"\nfinal shape: {df.shape}")

@@ -57,10 +57,13 @@ print(f"train end: {train_end}, total: {total_len}")
 data_raw = df[feat_cols].values
 mw_raw = df['mw'].values.reshape(-1,1)
 
+# LEAKAGE CHECK: both feature scaler and target scaler are fit on
+# TRAIN data only (data_raw[:train_end]).  Test data is only transformed,
+# never used to compute scaling parameters.
 scaler_X = StandardScaler()
 scaler_y = StandardScaler()
-scaler_X.fit(data_raw[:train_end])
-scaler_y.fit(mw_raw[:train_end])
+scaler_X.fit(data_raw[:train_end])    # fit on train only
+scaler_y.fit(mw_raw[:train_end])      # fit on train only
 
 data_scaled = scaler_X.transform(data_raw)
 mw_scaled = scaler_y.transform(mw_raw).flatten()

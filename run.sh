@@ -9,21 +9,25 @@ echo "  AEP Ohio Load Forecasting Pipeline"
 echo "=========================================="
 
 echo ""
-echo "[1/5] Installing dependencies..."
-pip install -r requirements.txt
+echo "[1/6] Installing dependencies..."
+python -m pip install -r requirements.txt
 
 echo ""
-echo "[2/5] Data preprocessing & feature engineering..."
+echo "[2/6] Data preprocessing & feature engineering..."
 python src/data_prep.py
 
 echo ""
-echo "[3/5] Exploratory Data Analysis..."
+echo "[3/6] Exploratory Data Analysis..."
 python src/eda.py
 
 echo ""
-echo "[4/5] Training models..."
+echo "[4/6] Training models..."
 echo "  --- Ridge / Lasso / ElasticNet ---"
 python src/ridge_model.py
+
+echo ""
+echo "  --- SARIMAX (classical baseline) ---"
+python src/sarimax_model.py
 
 echo ""
 echo "  --- XGBoost ---"
@@ -34,7 +38,7 @@ echo "  --- PatchTST Transformer ---"
 python src/transformer_model.py
 
 echo ""
-echo "[5/5] Residual analysis & model comparison..."
+echo "[5/6] Residual analysis & model comparison..."
 python src/residual_analysis.py
 
 echo ""

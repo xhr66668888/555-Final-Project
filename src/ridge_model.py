@@ -75,9 +75,11 @@ X_wx = df[weather_cols].values
 X_wx_train = X_wx[train_mask]
 X_wx_test = X_wx[test_mask]
 
+# LEAKAGE CHECK: scaler is fit on TRAIN only, then applied to test.
+# This prevents any test-set statistics from leaking into training.
 scaler_wx = StandardScaler()
-X_wx_train_s = scaler_wx.fit_transform(X_wx_train)
-X_wx_test_s = scaler_wx.transform(X_wx_test)
+X_wx_train_s = scaler_wx.fit_transform(X_wx_train)   # fit on train
+X_wx_test_s = scaler_wx.transform(X_wx_test)          # transform only
 
 alphas = [0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0]
 tscv = TimeSeriesSplit(n_splits=5)
@@ -131,9 +133,10 @@ X_full = df[full_cols].values
 X_full_train = X_full[train_mask]
 X_full_test = X_full[test_mask]
 
+# LEAKAGE CHECK: scaler fit on TRAIN only.
 scaler_full = StandardScaler()
-X_full_train_s = scaler_full.fit_transform(X_full_train)
-X_full_test_s = scaler_full.transform(X_full_test)
+X_full_train_s = scaler_full.fit_transform(X_full_train)   # fit on train
+X_full_test_s = scaler_full.transform(X_full_test)          # transform only
 
 best_a2=None
 best_rmse2=999999
