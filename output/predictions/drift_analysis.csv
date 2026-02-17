@@ -1,0 +1,5 @@
+model,slope_mw_per_month,p_value,significant,family
+Ridge (weather-only),87.47723235299658,0.0,True,Linear/ML
+SARIMAX,53.51293954878384,8.305931486518076e-14,True,Classical Statistical
+XGBoost,2.0820562097514745,1.4258594166231407e-06,True,Tree-based ML
+PatchTST,13.191492015533639,9.201680643218574e-91,True,Deep Learning
