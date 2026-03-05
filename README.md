@@ -138,11 +138,7 @@ This non-weather-driven load growth is consistent with **data center capacity ad
 
 ## Quick Start
 
-### Prerequisites
 
-- Python 3.10+
-- ~8 GB RAM (XGBoost grid search can be memory-intensive)
-- GPU optional (PatchTST benefits from CUDA but runs on CPU)
 
 ### Run Complete Pipeline
 
